@@ -47,4 +47,43 @@ public class UsuarioController {
         public String getContrasena() { return contrasena; }
         public void setContrasena(String contrasena) { this.contrasena = contrasena; }
     }
+
+    // Endpoint para registrar un nuevo usuario
+    @PostMapping("/registrar")
+    public ResponseEntity<?> registrar(@RequestBody RegistroRequest request) {
+        // Verifica si el correo ya existe
+        if (usuarioRepository.findByCorreo(request.getCorreo()).isPresent()) {
+            return ResponseEntity.badRequest().body("El correo ya está registrado");
+        }
+
+        Usuario usuario = new Usuario();
+        usuario.setNombre(request.getNombre());
+        usuario.setCorreo(request.getCorreo());
+        usuario.setContrasena(request.getContrasena());
+
+        // Asignar rol automáticamente según el dominio del correo
+        String correo = request.getCorreo().toLowerCase();
+        if (correo.endsWith("@empresa.ac.pa")) {
+            usuario.setRol("ADMIN");
+        } else {
+            usuario.setRol("CLIENTE");
+        }
+
+        usuarioRepository.save(usuario);
+        return ResponseEntity.ok("Usuario registrado exitosamente");
+    }
+
+    // Clase interna para recibir los datos del registro
+    public static class RegistroRequest {
+        private String nombre;
+        private String correo;
+        private String contrasena;
+
+        public String getNombre() { return nombre; }
+        public void setNombre(String nombre) { this.nombre = nombre; }
+        public String getCorreo() { return correo; }
+        public void setCorreo(String correo) { this.correo = correo; }
+        public String getContrasena() { return contrasena; }
+        public void setContrasena(String contrasena) { this.contrasena = contrasena; }
+    }
 }

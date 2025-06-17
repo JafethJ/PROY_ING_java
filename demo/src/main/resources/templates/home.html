@@ -223,13 +223,6 @@
                 <label for="regPass" class="form-label">Contraseña</label>
                 <input type="password" class="form-control" id="regPass" name="password" required>
               </div>
-              <div class="mb-3">
-                <label for="regRol" class="form-label">Tipo de cuenta</label>
-                <select class="form-select" id="regRol" name="rol">
-                  <option value="CLIENTE">Cliente</option>
-                  <option value="ADMIN">Administrador</option>
-                </select>
-              </div>
               <button type="submit" class="btn btn-success w-100">Registrarse</button>
             </form>
           </div>
@@ -247,6 +240,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -272,12 +266,11 @@
         const nombre = document.getElementById('regNombre').value;
         const correo = document.getElementById('regCorreo').value;
         const contrasena = document.getElementById('regPass').value;
-        const rol = document.getElementById('regRol').value;
 
-        const response = await fetch('/api/registro', {
+        const response = await fetch('/api/registrar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nombre, correo, contrasena, rol })
+            body: JSON.stringify({ nombre, correo, contrasena })
         });
 
         if (response.ok) {
@@ -286,10 +279,11 @@
             // Limpiar formulario
             document.getElementById('registerForm').reset();
         } else {
-            alert("Error al registrar el usuario. Inténtalo de nuevo.");
+            alert(await response.text());
         }
     });
 </script>
+
 
 </body>
 </html>
