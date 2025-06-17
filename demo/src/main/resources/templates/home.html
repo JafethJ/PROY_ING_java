@@ -157,42 +157,16 @@
 
 <div class="container mt-4">
     <h2 class="text-center mb-4">🍟 Nuestros Combos Destacados</h2>
-    
+<!-- filepath: c:\Users\kilia\PROY_ING_java\demo\src\main\resources\templates\home.html -->
+<div class="container mt-4">
     <div class="row">
-        <!-- Producto 1 -->
-        <div class="col-md-4">
-            <div class="card">
-                <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd" class="card-img-top" alt="Hamburguesa Clásica">
+        <div class="col-md-4" th:each="producto : ${productos}">
+            <div class="card mb-4">
+                <img th:src="${producto.imagen}" class="card-img-top" th:alt="${producto.nombreProducto}">
                 <div class="card-body">
-                    <h5 class="card-title">Hamburguesa Clásica</h5>
-                    <p class="card-text">Carne jugosa, queso derretido, lechuga fresca y nuestra salsa especial.</p>
-                    <span class="price-tag">$8.99</span>
-                    <button class="btn btn-primary w-100 mt-2">Añadir al carrito</button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Producto 2 -->
-        <div class="col-md-4">
-            <div class="card">
-                <img src="https://images.unsplash.com/photo-1551782450-a2132b4ba21d" class="card-img-top" alt="Hot Dog Especial">
-                <div class="card-body">
-                    <h5 class="card-title">Hot Dog Especial</h5>
-                    <p class="card-text">Salchicha premium con todos los toppings que puedas imaginar.</p>
-                    <span class="price-tag">$6.99</span>
-                    <button class="btn btn-primary w-100 mt-2">Añadir al carrito</button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Producto 3 -->
-        <div class="col-md-4">
-            <div class="card">
-                <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c" class="card-img-top" alt="Ensalada César">
-                <div class="card-body">
-                    <h5 class="card-title">Ensalada César</h5>
-                    <p class="card-text">Fresca y crujiente con pollo a la parrilla y aderezo casero.</p>
-                    <span class="price-tag">$7.49</span>
+                    <h5 class="card-title" th:text="${producto.nombreProducto}">Nombre</h5>
+                    <p class="card-text" th:text="${producto.descripcion}">Descripción</p>
+                    <span class="price-tag" th:text="'$' + ${producto.precio}">Precio</span>
                     <button class="btn btn-primary w-100 mt-2">Añadir al carrito</button>
                 </div>
             </div>
