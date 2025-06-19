@@ -4,20 +4,23 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import com.example.demo.repository.ProductoRepository;
+import com.example.demo.repository.CategoriaRepository;
 
 @Controller
 public class HomeController {
 
     private final ProductoRepository productoRepository;
+    private final CategoriaRepository categoriaRepository;
 
-    public HomeController(ProductoRepository productoRepository) {
+    public HomeController(ProductoRepository productoRepository, CategoriaRepository categoriaRepository) {
         this.productoRepository = productoRepository;
+        this.categoriaRepository = categoriaRepository;
     }
 
     @GetMapping("/")
     public String mostrarHome(Model model) {
-        var productos = productoRepository.findAll();
-        model.addAttribute("productos", productos);
+        model.addAttribute("productos", productoRepository.findAll());
+        model.addAttribute("categorias", categoriaRepository.findAll());
         return "home";
     }
 

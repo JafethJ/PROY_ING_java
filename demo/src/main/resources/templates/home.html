@@ -135,6 +135,135 @@
             padding: 2rem 0;
             margin-top: 3rem;
         }
+        .category-carousel-outer {
+            max-width: 1200px;
+            margin: 0 auto 2rem auto;
+        }
+
+        .category-carousel-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 2.5rem;
+        }
+
+        .category-carousel-container {
+            position: relative;
+            overflow: hidden;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        .category-carousel-track {
+            display: flex;
+            transition: transform 0.5s ease;
+            gap: 20px;
+        }
+
+        .category-carousel-card {
+        min-width: 200px;
+        height: 150px;
+        border-radius: 12px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin: 0 10px;
+        cursor: pointer;
+    }
+
+    .category-carousel-card .category-carousel-name {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        background: rgba(0,0,0,0.5); /* Fondo semitransparente para contraste */
+        color: #fff;
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: bold;
+        padding: 10px 0;
+        margin: 0;
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+        .category-carousel-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        
+
+        .category-carousel-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .category-carousel-controls {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.9);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #333;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        .category-carousel-controls:hover {
+            background: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+        .category-carousel-prev {
+            left: 10px;
+        }
+        .category-carousel-next {
+            right: 10px;
+        }
+
+        .category-carousel-auto-play-toggle {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .category-carousel-toggle-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+        .category-carousel-toggle-btn:hover {
+            background: #5a67d8;
+        }
+        .category-carousel-toggle-btn.paused {
+            background: #e53e3e;
+        }
+
+        @media (max-width: 768px) {
+            .category-carousel-card {
+                min-width: 150px;
+                height: 120px;
+            }
+            .category-carousel-icon {
+                font-size: 2rem;
+            }
+            .category-carousel-name {
+                font-size: 0.9rem;
+            }
+        }
+      
     </style>
 </head>
 <body>
@@ -155,8 +284,25 @@
     </div>
 </div>
 
+<div class="category-carousel-outer">
+    <h1 class="category-carousel-title">Nuestras Categorías</h1>
+    <div class="category-carousel-container">
+        <div class="category-carousel-track" id="carouselTrack">
+    <div class="category-carousel-card" 
+         th:each="categoria : ${categorias}"
+         th:style="'background-image: url(' + ${categoria.imagen} + ');'">
+        <div class="category-carousel-name" th:text="${categoria.nombreCategoria}">Categoría</div>
+        </div>
+    </div>
+        <button class="category-carousel-controls category-carousel-prev" onclick="moveCarousel('prev')">‹</button>
+        <button class="category-carousel-controls category-carousel-next" onclick="moveCarousel('next')">›</button>
+    </div>
+</div>
+
 <div class="container mt-4">
     <h2 class="text-center mb-4">🍟 Nuestros Combos Destacados</h2>
+    <!-- Carrusel de categorías estático -->
+
 <!-- filepath: c:\Users\kilia\PROY_ING_java\demo\src\main\resources\templates\home.html -->
 <div class="container mt-4">
     <div class="row">
@@ -282,6 +428,163 @@
             alert(await response.text());
         }
     });
+
+     class CategoryCarousel {
+            constructor() {
+                this.track = document.getElementById('carouselTrack');
+                this.cards = document.querySelectorAll('.category-card');
+                this.toggleBtn = document.getElementById('toggleBtn');
+                
+                this.currentPosition = 0;
+                this.cardWidth = 220; // 200px + 20px gap
+                this.visibleCards = this.getVisibleCards();
+                this.maxPosition = (this.cards.length - this.visibleCards) * this.cardWidth;
+                
+                this.isAutoPlaying = true;
+                this.autoPlaySpeed = 3000; // 3 segundos
+                
+                this.startAutoPlay();
+                this.addEventListeners();
+            }
+            
+            getVisibleCards() {
+                const containerWidth = this.track.parentElement.offsetWidth - 40; // menos padding
+                return Math.floor(containerWidth / this.cardWidth);
+            }
+            
+            updateCarousel() {
+                this.track.style.transform = `translateX(-${this.currentPosition}px)`;
+            }
+            
+            moveNext() {
+                if (this.currentPosition >= this.maxPosition) {
+                    this.currentPosition = 0; // Volver al inicio
+                } else {
+                    this.currentPosition += this.cardWidth;
+                }
+                this.updateCarousel();
+            }
+            
+            movePrev() {
+                if (this.currentPosition <= 0) {
+                    this.currentPosition = this.maxPosition; // Ir al final
+                } else {
+                    this.currentPosition -= this.cardWidth;
+                }
+                this.updateCarousel();
+            }
+            
+            startAutoPlay() {
+                if (this.autoPlayInterval) {
+                    clearInterval(this.autoPlayInterval);
+                }
+                
+                this.autoPlayInterval = setInterval(() => {
+                    if (this.isAutoPlaying) {
+                        this.moveNext();
+                    }
+                }, this.autoPlaySpeed);
+            }
+            
+            toggleAutoPlay() {
+                this.isAutoPlaying = !this.isAutoPlaying;
+                
+                if (this.isAutoPlaying) {
+                    this.toggleBtn.innerHTML = '⏸️ Pausar';
+                    this.toggleBtn.classList.remove('paused');
+                    this.startAutoPlay();
+                } else {
+                    this.toggleBtn.innerHTML = '▶️ Reproducir';
+                    this.toggleBtn.classList.add('paused');
+                    clearInterval(this.autoPlayInterval);
+                }
+            }
+            
+            addEventListeners() {
+                // Pausar en hover
+                this.track.parentElement.addEventListener('mouseenter', () => {
+                    if (this.isAutoPlaying) {
+                        clearInterval(this.autoPlayInterval);
+                    }
+                });
+                
+                this.track.parentElement.addEventListener('mouseleave', () => {
+                    if (this.isAutoPlaying) {
+                        this.startAutoPlay();
+                    }
+                });
+                
+                // Redimensionar ventana
+                window.addEventListener('resize', () => {
+                    this.visibleCards = this.getVisibleCards();
+                    this.maxPosition = (this.cards.length - this.visibleCards) * this.cardWidth;
+                    
+                    // Ajustar posición si es necesario
+                    if (this.currentPosition > this.maxPosition) {
+                        this.currentPosition = this.maxPosition;
+                        this.updateCarousel();
+                    }
+                });
+                
+                // Soporte táctil para móviles
+                let startX = 0;
+                let currentX = 0;
+                let isDragging = false;
+                
+                this.track.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                    isDragging = true;
+                    if (this.isAutoPlaying) {
+                        clearInterval(this.autoPlayInterval);
+                    }
+                });
+                
+                this.track.addEventListener('touchmove', (e) => {
+                    if (!isDragging) return;
+                    currentX = e.touches[0].clientX;
+                });
+                
+                this.track.addEventListener('touchend', () => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    
+                    const diff = startX - currentX;
+                    
+                    if (Math.abs(diff) > 50) {
+                        if (diff > 0) {
+                            this.moveNext();
+                        } else {
+                            this.movePrev();
+                        }
+                    }
+                    
+                    if (this.isAutoPlaying) {
+                        this.startAutoPlay();
+                    }
+                });
+            }
+        }
+        
+        // Variables globales
+        let carousel;
+        
+        // Funciones para los botones
+        function moveCarousel(direction) {
+            if (direction === 'next') {
+                carousel.moveNext();
+            } else {
+                carousel.movePrev();
+            }
+        }
+        
+        function toggleAutoPlay() {
+            carousel.toggleAutoPlay();
+        }
+        
+        // Inicializar cuando carga la página
+        document.addEventListener('DOMContentLoaded', () => {
+            carousel = new CategoryCarousel();
+        });
 </script>
 
 
