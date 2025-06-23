@@ -2,9 +2,14 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.Usuario;
 import com.example.demo.repository.UsuarioRepository;
+
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -36,7 +41,7 @@ public class UsuarioController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
         // Hashea la contraseña antes de buscar en la base de datos
         String hashedPassword = hashPassword(request.getContrasena());
         Optional<Usuario> usuarioOpt = usuarioRepository.findByCorreoAndContrasena(
@@ -44,10 +49,11 @@ public class UsuarioController {
 
         if (usuarioOpt.isPresent()) {
             Usuario usuario = usuarioOpt.get();
+            session.setAttribute("usuario", usuario);
             if ("ADMIN".equalsIgnoreCase(usuario.getRol())) {
                 return ResponseEntity.ok("/admin/panel");
             } else if ("CLIENTE".equalsIgnoreCase(usuario.getRol())) {
-                return ResponseEntity.ok("/cliente/panel");
+                return ResponseEntity.ok("/"); // Redirige a home
             } else {
                 return ResponseEntity.badRequest().body("Rol desconocido");
             }
@@ -56,6 +62,7 @@ public class UsuarioController {
         }
     }
 
+    
     // Clase interna para recibir los datos del login
     public static class LoginRequest {
         private String correo;
@@ -91,6 +98,16 @@ public class UsuarioController {
 
         usuarioRepository.save(usuario);
         return ResponseEntity.ok("Usuario registrado exitosamente");
+    }
+
+    @GetMapping("/usuario-logeado")
+    public Map<String, Object> usuarioLogeado(HttpSession session) {
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("logeado", session.getAttribute("usuario") != null);
+        if (session.getAttribute("usuario") != null) {
+            resp.put("rol", ((Usuario)session.getAttribute("usuario")).getRol());
+        }
+        return resp;
     }
 
     // Clase interna para recibir los datos del registro

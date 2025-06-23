@@ -44,7 +44,7 @@
       <scope>runtime</scope>
     </dependency>
 
-    <!-- Para pruebas (opcional) -->
+    <!-- Para pruebas -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
@@ -54,6 +54,12 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-thymeleaf</artifactId>
+    </dependency>
+
+    <!-- Para manejar la seguridad -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
 
   </dependencies>
