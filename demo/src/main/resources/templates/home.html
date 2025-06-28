@@ -178,22 +178,22 @@
         box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         margin: 0 10px;
         cursor: pointer;
-    }
+        }
 
-    .category-carousel-card .category-carousel-name {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        background: rgba(0,0,0,0.5); /* Fondo semitransparente para contraste */
-        color: #fff;
-        text-align: center;
-        font-size: 1.2rem;
-        font-weight: bold;
-        padding: 10px 0;
-        margin: 0;
-        border-bottom-left-radius: 12px;
-        border-bottom-right-radius: 12px;
-    }
+        .category-carousel-card .category-carousel-name {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0,0,0,0.5); /* Fondo semitransparente para contraste */
+            color: #fff;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 10px 0;
+            margin: 0;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
         .category-carousel-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 35px rgba(0,0,0,0.2);
@@ -370,7 +370,6 @@
     <h2 class="text-center mb-4">🍟 Nuestros Combos Destacados</h2>
     <!-- Carrusel de categorías estático -->
 
-<!-- filepath: c:\Users\kilia\PROY_ING_java\demo\src\main\resources\templates\home.html -->
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-4" th:each="producto : ${productos}">
@@ -419,6 +418,9 @@
               </div>
               <button type="submit" class="btn btn-primary w-100">Entrar</button>
             </form>
+            <div class="text-end mt-2">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#recuperarModal" class="small">¿Olvidaste tu contraseña?</a>
+            </div>
           </div>
 
           <!-- Registro -->

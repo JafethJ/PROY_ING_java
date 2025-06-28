@@ -12,9 +12,7 @@ public class SecurityConfig {
         http
             .csrf().disable()
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/api/login", "/api/registrar", "/api/usuario-logeado", "/css/**", "/js/**", "/images/**").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/cliente/**").hasRole("CLIENTE")
+                .requestMatchers("/", "/api/login", "/api/registrar", "/api/usuario-logeado", "/css/**", "/js/**", "/images/**", "/admin/**", "/cliente/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin().disable()

@@ -32,8 +32,12 @@ public class HomeController {
     }
 
     @GetMapping("/admin/panel")
-    public String panelAdmin() {
-        return "admin";
+    public String panelAdmin(HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario != null && "ADMIN".equals(usuario.getRol())) {
+            return "admin";
+        }
+        return "redirect:/";
     }
 
     @GetMapping("/cliente/panel")
