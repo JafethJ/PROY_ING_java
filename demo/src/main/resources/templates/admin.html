@@ -90,9 +90,8 @@
             transform: translateY(-2px);
         }
 
-        button {
-            display: block;
-            margin: 0 auto;
+        .btn {
+            display: inline-block;
             padding: 12px 30px;
             background-color: var(--danger);
             color: white;
@@ -103,9 +102,11 @@
             font-size: 1rem;
             transition: var(--transition);
             box-shadow: var(--box-shadow);
+            text-align: center;
+            text-decoration: none;
         }
 
-        button:hover {
+        .btn:hover {
             background-color: #D32F2F;
             transform: translateY(-2px);
             box-shadow: 0 6px 8px rgba(244, 67, 54, 0.2);
@@ -135,12 +136,8 @@
         </ul>
     </nav>
 
-    <button onclick="logout()">Cerrar sesión</button>
-
-    <script>
-        function logout() {
-            window.location.href = "/";
-        }
-    </script>
+    <a class="btn btn-danger" href="/logout">
+        Cerrar sesión
+    </a>
 </body>
 </html>
