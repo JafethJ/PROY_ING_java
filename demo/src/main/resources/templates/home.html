@@ -301,6 +301,13 @@
             margin-bottom: 20px;
             display: none;
         }
+
+        .btn-circle {
+  border-radius: 50% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
     </style>
 </head>
 <body>
@@ -471,39 +478,47 @@
         <h5 class="modal-title" id="modalAgregarCarritoLabel">Añadir al carrito</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
-      <div class="modal-body text-center">
-        <img id="modalProductoImagen" src="" alt="Imagen producto" class="img-fluid mb-3" style="max-height:180px;">
-        <h5 id="modalProductoNombre"></h5>
-        <p id="modalProductoDescripcion"></p>
-        <!-- Cantidad -->
-        <div class="d-flex justify-content-center align-items-center mb-2">
-            <button type="button" class="btn btn-outline-secondary btn-sm me-2" id="btnRestarCantidad">-</button>
-            <span id="cantidadPedido" style="min-width:30px;display:inline-block;">1</span>
-            <button type="button" class="btn btn-outline-secondary btn-sm ms-2" id="btnSumarCantidad">+</button>
-            <span class="price-tag ms-3" id="modalProductoPrecio"></span>
-        </div>
-        <!-- Agrandar combo -->
-        <div class="form-check form-switch mb-2 d-flex align-items-center justify-content-center">
+      <div class="modal-body px-0">
+        <!-- Imagen ocupa todo el ancho -->
+        <img id="modalProductoImagen" src="" alt="Imagen producto" class="img-fluid w-100 mb-3" style="max-height:220px;object-fit:cover;border-radius:0;">
+        <div class="px-4">
+          <!-- Nombre y precio -->
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <h5 id="modalProductoNombre" class="mb-0"></h5>
+            <span class="price-tag fs-5 mb-0" id="modalProductoPrecio"></span>
+          </div>
+          <!-- Descripción -->
+          <p id="modalProductoDescripcion" class="mb-3 text-muted" style="font-size:1rem;"></p>
+          <!-- Cantidad -->
+          <div class="d-flex align-items-center mb-3">
+            <span class="me-2">Cantidad:</span>
+            <button type="button" class="btn btn-outline-secondary btn-circle me-2" id="btnRestarCantidad" style="width:36px;height:36px;font-size:1.3rem;padding:0;">−</button>
+            <span id="cantidadPedido" style="min-width:36px;display:inline-block;font-size:1.2rem;font-weight:500;">1</span>
+            <button type="button" class="btn btn-outline-secondary btn-circle ms-2" id="btnSumarCantidad" style="width:36px;height:36px;font-size:1.3rem;padding:0;">+</button>
+          </div>
+          <!-- Agrandar combo -->
+          <div class="form-check form-switch mb-3 d-flex align-items-center">
             <input class="form-check-input" type="checkbox" id="toggleAgrandarCombo">
             <label class="form-check-label ms-2" for="toggleAgrandarCombo">Agrandar (+$2.50)</label>
-        </div>
-        <!-- Extras desplegable (nueva sección) -->
-        <div class="mb-2">
-            <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#extrasCollapse" aria-expanded="false" aria-controls="extrasCollapse">
-                Extras <i class="bi bi-chevron-down"></i>
+          </div>
+          <!-- Extras desplegable -->
+          <div class="mb-2">
+            <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#extrasCollapse" aria-expanded="false" aria-controls="extrasCollapse">
+              Extras <i class="bi bi-chevron-down"></i>
             </button>
             <div class="collapse" id="extrasCollapse">
-                <div id="extrasContainer" class="mt-2"></div>
+              <div id="extrasContainer" class="mt-2"></div>
             </div>
-        </div>
-        <!-- Adicionales desplegable -->
-        <div class="mb-2">
-            <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#productosCollapse" aria-expanded="false" aria-controls="productosCollapse">
-                Añadir a tu pedido <i class="bi bi-chevron-down"></i>
+          </div>
+          <!-- Adicionales desplegable -->
+          <div class="mb-2">
+            <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#productosCollapse" aria-expanded="false" aria-controls="productosCollapse">
+              Añadir a tu pedido <i class="bi bi-chevron-down"></i>
             </button>
             <div class="collapse" id="productosCollapse">
-                <div id="productosAdicionalesContainer" class="mt-2"></div>
+              <div id="productosAdicionalesContainer" class="mt-2"></div>
             </div>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
