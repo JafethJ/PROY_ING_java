@@ -289,7 +289,18 @@
         .profile-dropdown .dropdown-divider {
             margin: 0.3rem 0;
         }
-      
+        
+        /* Estilo para el botón de volver a todos los productos */
+        .back-to-all {
+            display: none;
+            margin: 20px auto;
+            text-align: center;
+        }
+        .current-category-title {
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -355,23 +366,31 @@
     <h1 class="category-carousel-title">Nuestras Categorías</h1>
     <div class="category-carousel-container">
         <div class="category-carousel-track" id="carouselTrack">
-    <div class="category-carousel-card" 
-         th:each="categoria : ${categorias}"
-         th:style="'background-image: url(' + ${categoria.imagen} + ');'">
-        <div class="category-carousel-name" th:text="${categoria.nombreCategoria}">Categoría</div>
+            <!-- Nueva tarjeta "Todos" al inicio del carrusel -->
+            <div class="category-carousel-card" 
+                 style="background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836');"
+                 onclick="mostrarTodosProductos()">
+                <div class="category-carousel-name">Todos los productos</div>
+            </div>
+            <!-- Categorías normales -->
+            <div class="category-carousel-card" 
+                 th:each="categoria : ${categorias}"
+                 th:style="'background-image: url(' + ${categoria.imagen} + ');'"
+                 th:attr="data-idcategoria=${categoria.idCategoria}, data-nombrecategoria=${categoria.nombreCategoria}"
+                 onclick="filtrarPorCategoria(this)">
+                <div class="category-carousel-name" th:text="${categoria.nombreCategoria}">Categoría</div>
+            </div>
         </div>
-    </div>
-        <button class="category-carousel-controls category-carousel-prev" onclick="moveCarousel('prev')">‹</button>
-        <button class="category-carousel-controls category-carousel-next" onclick="moveCarousel('next')">›</button>
+        <button class="category-carousel-controls category-carousel-prev">‹</button>
+        <button class="category-carousel-controls category-carousel-next">›</button>
     </div>
 </div>
 
 <div class="container mt-4">
-    <h2 class="text-center mb-4">🍟 Nuestros Combos Destacados</h2>
-    <!-- Carrusel de categorías estático -->
-
-<div class="container mt-4">
-    <div class="row">
+    <h2 class="text-center mb-4" id="productosTitulo">🍟 Nuestros Combos Destacados</h2>
+    <h3 class="current-category-title" id="currentCategoryTitle"></h3>
+    
+    <div class="row" id="productosContainer">
         <div class="col-md-4" th:each="producto : ${productos}">
             <div class="card mb-4">
                 <img th:src="${producto.imagen}" class="card-img-top" th:alt="${producto.nombreProducto}">
@@ -463,13 +482,27 @@
             <button type="button" class="btn btn-outline-secondary btn-sm ms-2" id="btnSumarCantidad">+</button>
             <span class="price-tag ms-3" id="modalProductoPrecio"></span>
         </div>
-        <!-- Extras desplegable -->
+        <!-- Agrandar combo -->
+        <div class="form-check form-switch mb-2 d-flex align-items-center justify-content-center">
+            <input class="form-check-input" type="checkbox" id="toggleAgrandarCombo">
+            <label class="form-check-label ms-2" for="toggleAgrandarCombo">Agrandar (+$2.50)</label>
+        </div>
+        <!-- Extras desplegable (nueva sección) -->
+        <div class="mb-2">
+            <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#extrasCollapse" aria-expanded="false" aria-controls="extrasCollapse">
+                Extras <i class="bi bi-chevron-down"></i>
+            </button>
+            <div class="collapse" id="extrasCollapse">
+                <div id="extrasContainer" class="mt-2"></div>
+            </div>
+        </div>
+        <!-- Adicionales desplegable -->
         <div class="mb-2">
             <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#productosCollapse" aria-expanded="false" aria-controls="productosCollapse">
                 Añadir a tu pedido <i class="bi bi-chevron-down"></i>
             </button>
             <div class="collapse" id="productosCollapse">
-                <div id="productosContainer" class="mt-2"></div>
+                <div id="productosAdicionalesContainer" class="mt-2"></div>
             </div>
         </div>
       </div>
@@ -487,9 +520,21 @@
     </div>
 </footer>
 
+<div id="toastCarrito" style="position: fixed; bottom: 30px; right: 30px; z-index: 9999; display: none;">
+    <div class="toast align-items-center text-white bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                Producto añadido al carrito
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script th:inline="javascript">
     window.productos = [[${productos}]];
+    window.categorias = [[${categorias}]];
+    window.decoradores = [[${decoradores}]]; // Asegúrate de pasar la lista de decoradores desde el backend
 </script>
 <script>
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -533,141 +578,53 @@
         }
     });
 
-    class CategoryCarousel {
-            constructor() {
-                this.track = document.getElementById('carouselTrack');
-                this.cards = document.querySelectorAll('.category-card');
-                this.toggleBtn = document.getElementById('toggleBtn');
-                
-                this.currentPosition = 0;
-                this.cardWidth = 220; // 200px + 20px gap
-                this.visibleCards = this.getVisibleCards();
-                this.maxPosition = (this.cards.length - this.visibleCards) * this.cardWidth;
-                
-                this.isAutoPlaying = true;
-                this.autoPlaySpeed = 3000; // 3 segundos
-                
-                this.startAutoPlay();
-                this.addEventListeners();
-            }
-            
-            getVisibleCards() {
-                const containerWidth = this.track.parentElement.offsetWidth - 40; // menos padding
-                return Math.floor(containerWidth / this.cardWidth);
-            }
-            
-            updateCarousel() {
-                this.track.style.transform = `translateX(-${this.currentPosition}px)`;
-            }
-            
-            moveNext() {
-                if (this.currentPosition >= this.maxPosition) {
-                    this.currentPosition = 0; // Volver al inicio
-                } else {
-                    this.currentPosition += this.cardWidth;
-                }
-                this.updateCarousel();
-            }
-            
-            movePrev() {
-                if (this.currentPosition <= 0) {
-                    this.currentPosition = this.maxPosition; // Ir al final
-                } else {
-                    this.currentPosition -= this.cardWidth;
-                }
-                this.updateCarousel();
-            }
-            
-            startAutoPlay() {
-                if (this.autoPlayInterval) {
-                    clearInterval(this.autoPlayInterval);
-                }
-                
-                this.autoPlayInterval = setInterval(() => {
-                    if (this.isAutoPlaying) {
-                        this.moveNext();
-                    }
-                }, this.autoPlaySpeed);
-            }
-            
-            toggleAutoPlay() {
-                this.isAutoPlaying = !this.isAutoPlaying;
-                
-                if (this.isAutoPlaying) {
-                    this.toggleBtn.innerHTML = '⏸️ Pausar';
-                    this.toggleBtn.classList.remove('paused');
-                    this.startAutoPlay();
-                } else {
-                    this.toggleBtn.innerHTML = '▶️ Reproducir';
-                    this.toggleBtn.classList.add('paused');
-                    clearInterval(this.autoPlayInterval);
-                }
-            }
-            
-            addEventListeners() {
-                // Pausar en hover
-                this.track.parentElement.addEventListener('mouseenter', () => {
-                    if (this.isAutoPlaying) {
-                        clearInterval(this.autoPlayInterval);
-                    }
-                });
-                
-                this.track.parentElement.addEventListener('mouseleave', () => {
-                    if (this.isAutoPlaying) {
-                        this.startAutoPlay();
-                    }
-                });
-                
-                // Redimensionar ventana
-                window.addEventListener('resize', () => {
-                    this.visibleCards = this.getVisibleCards();
-                    this.maxPosition = (this.cards.length - this.visibleCards) * this.cardWidth;
-                    
-                    // Ajustar posición si es necesario
-                    if (this.currentPosition > this.maxPosition) {
-                        this.currentPosition = this.maxPosition;
-                        this.updateCarousel();
-                    }
-                });
-                
-                // Soporte táctil para móviles
-                let startX = 0;
-                let currentX = 0;
-                let isDragging = false;
-                
-                this.track.addEventListener('touchstart', (e) => {
-                    startX = e.touches[0].clientX;
-                    isDragging = true;
-                    if (this.isAutoPlaying) {
-                        clearInterval(this.autoPlayInterval);
-                    }
-                });
-                
-                this.track.addEventListener('touchmove', (e) => {
-                    if (!isDragging) return;
-                    currentX = e.touches[0].clientX;
-                });
-                
-                this.track.addEventListener('touchend', () => {
-                    if (!isDragging) return;
-                    isDragging = false;
-                    
-                    const diff = startX - currentX;
-                    
-                    if (Math.abs(diff) > 50) {
-                        if (diff > 0) {
-                            this.moveNext();
-                        } else {
-                            this.movePrev();
-                        }
-                    }
-                    
-                    if (this.isAutoPlaying) {
-                        this.startAutoPlay();
-                    }
-                });
-            }
+ class CategoryCarousel {
+    constructor() {
+        this.track = document.getElementById('carouselTrack');
+        this.cards = document.querySelectorAll('.category-carousel-card');
+        this.prevBtn = document.querySelector('.category-carousel-prev');
+        this.nextBtn = document.querySelector('.category-carousel-next');
+        
+        this.cardWidth = 220; // Ancho de cada tarjeta + gap
+        this.currentPosition = 0;
+        this.visibleCards = this.calculateVisibleCards();
+        this.maxPosition = (this.cards.length - this.visibleCards) * this.cardWidth;
+        
+        // Configurar eventos
+        this.prevBtn.addEventListener('click', () => this.move(-1));
+        this.nextBtn.addEventListener('click', () => this.move(1));
+        window.addEventListener('resize', () => this.handleResize());
+    }
+    
+    calculateVisibleCards() {
+        const containerWidth = this.track.parentElement.offsetWidth - 40;
+        return Math.floor(containerWidth / this.cardWidth);
+    }
+    
+    move(direction) {
+        this.currentPosition += direction * this.cardWidth * 2; // Mover 2 tarjetas a la vez
+        
+        // Ajustar límites
+        if (this.currentPosition < 0) {
+            this.currentPosition = 0;
+        } else if (this.currentPosition > this.maxPosition) {
+            this.currentPosition = this.maxPosition;
         }
+        
+        this.track.style.transform = `translateX(-${this.currentPosition}px)`;
+        this.track.style.transition = 'transform 0.5s ease';
+    }
+    
+    handleResize() {
+        this.visibleCards = this.calculateVisibleCards();
+        this.maxPosition = (this.cards.length - this.visibleCards) * this.cardWidth;
+        
+        if (this.currentPosition > this.maxPosition) {
+            this.currentPosition = this.maxPosition;
+            this.track.style.transform = `translateX(-${this.currentPosition}px)`;
+        }
+    }
+}
         
         // Variables globales
         let carousel;
@@ -706,86 +663,218 @@
             document.getElementById('cantidadPedido').innerText = cantidadPedido;
         };
 
-        // Función para agregar al carrito (muestra modal con info)
-        function agregarAlCarrito(idProducto) {
-            fetch('/api/usuario-logeado')
-            .then(res => res.json())
-            .then(data => {
-                if (data.logeado) {
-                    const card = document.querySelector(`button[onclick*="agregarAlCarrito(${idProducto})"]`).closest('.card');
-                    const nombre = card.querySelector('.card-title').innerText;
-                    const descripcion = card.querySelector('.card-text').innerText;
-                    const precio = card.querySelector('.price-tag').innerText;
-                    const imagen = card.querySelector('.card-img-top').getAttribute('src');
-                    productoSeleccionado = { idProducto, nombre, descripcion, precio, imagen };
+        // Agrandar combo lógica
+        let agrandarCombo = false;
+        document.getElementById('toggleAgrandarCombo').addEventListener('change', function() {
+            agrandarCombo = this.checked;
+            actualizarPrecioModal();
+        });
 
-                    // Reset cantidad
-                    cantidadPedido = 1;
-                    document.getElementById('cantidadPedido').innerText = cantidadPedido;
-
-                    // Rellenar el modal
-                    document.getElementById('modalProductoImagen').src = imagen;
-                    document.getElementById('modalProductoNombre').innerText = nombre;
-                    document.getElementById('modalProductoDescripcion').innerText = descripcion;
-                    document.getElementById('modalProductoPrecio').innerText = precio;
-
-                    // Cargar extras (productos con id_categoria 8 o 9)
-                    const productosContainer = document.getElementById('productosContainer');
-                    productosContainer.innerHTML = '';
-                    const productos = window.productos; // Usa el array global exportado por Thymeleaf
-                    // Filtra productos con idCategoria 8 o 9
-                    const productosAdicionales = window.productos.filter(p => p.idCategoria == 8 || p.idCategoria == 9);
-                    if (productosAdicionales.length > 0) {
-                        productosAdicionales.forEach(producto => {
-                            const productoDiv = document.createElement('div');
-                            productoDiv.className = "d-flex align-items-center justify-content-between mb-1";
-                            productoDiv.innerHTML = `
-                                <div class="form-check">
-                                    <input class="form-check-input producto-checkbox" type="checkbox" value="${producto.idProducto}" data-nombre="${producto.nombreProducto}" data-precio="${producto.precio}" id="producto${producto.idProducto}">
-                                    <label class="form-check-label" for="producto${producto.idProducto}">
-                                        ${producto.nombreProducto}
-                                    </label>
-                                </div>
-                                <span class="text-muted small">$${producto.precio}</span>
-                            `;
-                            productosContainer.appendChild(productoDiv);
-                        });
-                    } else {
-                        productosContainer.innerHTML = '<span class="text-muted">No hay productos adicionales disponibles.</span>';
-                    }
-
-                    // Mostrar el modal
-                    var modal = new bootstrap.Modal(document.getElementById('modalAgregarCarrito'));
-                    modal.show();
-                } else {
-                    var loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
-                    loginModal.show();
-                }
-            });
+        function actualizarPrecioModal() {
+            if (!productoSeleccionado) return;
+            let precioBase = parseFloat(productoSeleccionado.precio.toString().replace('$',''));
+            let precioFinal = agrandarCombo ? (precioBase + 2.5) : precioBase;
+            document.getElementById('modalProductoPrecio').innerText = '$' + precioFinal.toFixed(2);
         }
 
-        // Evento para el botón de confirmar añadir al carrito
-        document.getElementById('btnConfirmarAgregarCarrito').addEventListener('click', function() {
-            if (productoSeleccionado) {
-                // Obtener productos adicionales seleccionados
-                const productosSeleccionados = [];
-                document.querySelectorAll('.producto-checkbox:checked').forEach(cb => {
-                    productosSeleccionados.push({
-                        id: cb.value,
-                        nombre: cb.getAttribute('data-nombre'),
-                        precio: cb.getAttribute('data-precio')
-                    });
+        // Función para agregar al carrito (muestra modal con info)
+function agregarAlCarrito(idProducto) {
+    fetch('/api/usuario-logeado')
+    .then(res => res.json())
+    .then(data => {
+        if (data.logeado) {
+            const card = document.querySelector(`button[onclick*="agregarAlCarrito(${idProducto})"]`).closest('.card');
+            const nombre = card.querySelector('.card-title').innerText;
+            const descripcion = card.querySelector('.card-text').innerText;
+            const precio = card.querySelector('.price-tag').innerText.replace('$','');
+            const imagen = card.querySelector('.card-img-top').getAttribute('src');
+            productoSeleccionado = { idProducto, nombre, descripcion, precio, imagen };
+
+            // Reset cantidad y agrandar
+            cantidadPedido = 1;
+            agrandarCombo = false;
+            document.getElementById('cantidadPedido').innerText = cantidadPedido;
+            document.getElementById('toggleAgrandarCombo').checked = false;
+
+            // Rellenar el modal
+            document.getElementById('modalProductoImagen').src = imagen;
+            document.getElementById('modalProductoNombre').innerText = nombre;
+            document.getElementById('modalProductoDescripcion').innerText = descripcion;
+            actualizarPrecioModal();
+
+            // Cargar extras (productos con id_categoria 8 o 9) - CAMBIO AQUÍ
+            const productosAdicionalesContainer = document.getElementById('productosAdicionalesContainer');
+            productosAdicionalesContainer.innerHTML = '';
+            const productos = window.productos;
+            const productosAdicionales = productos.filter(p => p.idCategoria == 8 || p.idCategoria == 9);
+            
+            if (productosAdicionales.length > 0) {
+                productosAdicionales.forEach(producto => {
+                    const productoDiv = document.createElement('div');
+                    productoDiv.className = "d-flex align-items-center justify-content-between mb-1";
+                    productoDiv.innerHTML = `
+                        <div class="form-check">
+                            <input class="form-check-input producto-checkbox" type="checkbox" value="${producto.idProducto}" 
+                                   data-nombre="${producto.nombreProducto}" data-precio="${producto.precio}" 
+                                   id="productoAdicional${producto.idProducto}">
+                            <label class="form-check-label" for="productoAdicional${producto.idProducto}">
+                                ${producto.nombreProducto}
+                            </label>
+                        </div>
+                        <span class="text-muted small">$${producto.precio}</span>
+                    `;
+                    productosAdicionalesContainer.appendChild(productoDiv);
                 });
-                
-                alert(
-                    `Producto: ${productoSeleccionado.nombre}\nCantidad: ${cantidadPedido}\nProductos adicionales: ${productosSeleccionados.map(p => p.nombre).join(', ')}`
-                );
-                var modal = bootstrap.Modal.getInstance(document.getElementById('modalAgregarCarrito'));
-                modal.hide();
+            } else {
+                productosAdicionalesContainer.innerHTML = '<span class="text-muted">No hay productos adicionales disponibles.</span>';
             }
+
+            // Cargar extras (decoradores con id_producto igual al producto seleccionado)
+            const extrasContainer = document.getElementById('extrasContainer');
+            extrasContainer.innerHTML = '';
+            const decoradores = window.decoradores || [];
+            const extras = decoradores.filter(d => d.idProducto == productoSeleccionado.idProducto);
+            if (extras.length > 0) {
+                extras.forEach(extra => {
+                    const extraDiv = document.createElement('div');
+                    extraDiv.className = "d-flex align-items-center justify-content-between mb-1";
+                    extraDiv.innerHTML = `
+                        <div class="form-check">
+                            <input class="form-check-input extra-checkbox" type="checkbox" value="${extra.idDecorador}" data-nombre="${extra.nombre}" data-precio="${extra.precioExtra}" id="extra${extra.idDecorador}">
+                            <label class="form-check-label" for="extra${extra.idDecorador}">
+                                ${extra.nombre}
+                            </label>
+                        </div>
+                        <span class="text-muted small">$${extra.precioExtra}</span>
+                    `;
+                    extrasContainer.appendChild(extraDiv);
+                });
+            } else {
+                extrasContainer.innerHTML = '<span class="text-muted">No hay extras disponibles para este producto.</span>';
+            }
+
+            // Mostrar el modal
+            var modal = new bootstrap.Modal(document.getElementById('modalAgregarCarrito'));
+            modal.show();
+        } else {
+            var loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+            loginModal.show();
+        }
+    });
+}
+
+// Evento para el botón de confirmar añadir al carrito - ACTUALIZAR ESTO TAMBIÉN
+document.getElementById('btnConfirmarAgregarCarrito').addEventListener('click', async function() {
+    if (productoSeleccionado) {
+        const productosSeleccionados = [];
+        document.querySelectorAll('#productosAdicionalesContainer .producto-checkbox:checked').forEach(cb => {
+            productosSeleccionados.push(Number(cb.value));
         });
+        const extrasSeleccionados = [];
+        document.querySelectorAll('#extrasContainer .extra-checkbox:checked').forEach(cb => {
+            extrasSeleccionados.push(Number(cb.value));
+        });
+
+        const item = {
+            idProducto: productoSeleccionado.idProducto,
+            nombre: productoSeleccionado.nombre,
+            precioBase: parseFloat(productoSeleccionado.precio),
+            cantidad: cantidadPedido,
+            agrandado: agrandarCombo,
+            productosAdicionales: productosSeleccionados,
+            extras: extrasSeleccionados
+        };
+
+        await fetch('/carrito/agregar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(item)
+        });
+
+        var modal = bootstrap.Modal.getInstance(document.getElementById('modalAgregarCarrito'));
+        modal.hide();
+
+        // Mostrar toast personalizado
+        mostrarToastCarrito();
+    }
+});
+
+// Función para mostrar el toast
+function mostrarToastCarrito() {
+    const toastDiv = document.getElementById('toastCarrito');
+    toastDiv.style.display = 'block';
+    setTimeout(() => {
+        toastDiv.style.display = 'none';
+    }, 3000);
+}
+
+       // Función para filtrar productos por categoría
+        function filtrarPorCategoria(elemento) {
+            const idCategoria = elemento.getAttribute('data-idcategoria');
+            const nombreCategoria = elemento.getAttribute('data-nombrecategoria');
+            
+            // Ocultar título principal y mostrar título de categoría
+            document.getElementById('productosTitulo').style.display = 'none';
+            document.getElementById('currentCategoryTitle').style.display = 'block';
+            document.getElementById('currentCategoryTitle').innerText = nombreCategoria;
+            
+            // Filtrar productos
+            const productos = window.productos;
+            const productosFiltrados = productos.filter(p => p.idCategoria == idCategoria);
+            
+            // Renderizar productos filtrados
+            const productosContainer = document.getElementById('productosContainer');
+            productosContainer.innerHTML = '';
+            
+            if (productosFiltrados.length > 0) {
+                productosFiltrados.forEach(producto => {
+                    const productoDiv = document.createElement('div');
+                    productoDiv.className = "col-md-4";
+                    productoDiv.innerHTML = `
+                        <div class="card mb-4">
+                            <img src="${producto.imagen}" class="card-img-top" alt="${producto.nombreProducto}">
+                            <div class="card-body">
+                                <h5 class="card-title">${producto.nombreProducto}</h5>
+                                <p class="card-text">${producto.descripcion}</p>
+                                <span class="price-tag">$${producto.precio}</span>
+                                <button class="btn btn-primary w-100 mt-2" onclick="agregarAlCarrito(${producto.idProducto})">Añadir al carrito</button>
+                            </div>
+                        </div>
+                    `;
+                    productosContainer.appendChild(productoDiv);
+                });
+            } else {
+                productosContainer.innerHTML = '<div class="col-12 text-center"><p>No hay productos disponibles en esta categoría.</p></div>';
+            }
+        }
+        
+        // Función para volver a mostrar todos los productos
+        function mostrarTodosProductos() {
+            const productos = window.productos;
+            const productosContainer = document.getElementById('productosContainer');
+            productosContainer.innerHTML = '';
+            
+            productos.forEach(producto => {
+                const productoDiv = document.createElement('div');
+                productoDiv.className = "col-md-4";
+                productoDiv.innerHTML = `
+                    <div class="card mb-4">
+                        <img src="${producto.imagen}" class="card-img-top" alt="${producto.nombreProducto}">
+                        <div class="card-body">
+                            <h5 class="card-title">${producto.nombreProducto}</h5>
+                            <p class="card-text">${producto.descripcion}</p>
+                            <span class="price-tag">$${producto.precio}</span>
+                            <button class="btn btn-primary w-100 mt-2" onclick="agregarAlCarrito(${producto.idProducto})">Añadir al carrito</button>
+                        </div>
+                    </div>
+                `;
+                productosContainer.appendChild(productoDiv);
+            });
+            
+            // Restaurar vista original
+            document.getElementById('productosTitulo').style.display = 'block';
+            document.getElementById('currentCategoryTitle').style.display = 'none';
+        }
     </script>
-
-
 </body>
 </html>
