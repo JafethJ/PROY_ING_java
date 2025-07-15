@@ -489,13 +489,15 @@
           </div>
           <!-- Descripción -->
           <p id="modalProductoDescripcion" class="mb-3 text-muted" style="font-size:1rem;"></p>
-          <!-- Cantidad -->
-          <div class="d-flex align-items-center mb-3">
-            <span class="me-2">Cantidad:</span>
-            <button type="button" class="btn btn-outline-secondary btn-circle me-2" id="btnRestarCantidad" style="width:36px;height:36px;font-size:1.3rem;padding:0;">−</button>
-            <span id="cantidadPedido" style="min-width:36px;display:inline-block;font-size:1.2rem;font-weight:500;">1</span>
-            <button type="button" class="btn btn-outline-secondary btn-circle ms-2" id="btnSumarCantidad" style="width:36px;height:36px;font-size:1.3rem;padding:0;">+</button>
-          </div>
+        <!-- Cantidad -->
+        <div class="d-flex align-items-center mb-3">
+        <span class="me-3">Cantidad:</span>
+        <div class="d-flex align-items-center">
+            <button type="button" class="btn btn-outline-secondary btn-circle" id="btnRestarCantidad" style="width:36px;height:36px;font-size:1.3rem;padding:0;display:flex;align-items:center;justify-content:center;">−</button>
+            <span id="cantidadPedido" class="mx-2" style="min-width:24px;text-align:center;font-size:1.2rem;font-weight:500;">1</span>
+            <button type="button" class="btn btn-outline-secondary btn-circle" id="btnSumarCantidad" style="width:36px;height:36px;font-size:1.3rem;padding:0;display:flex;align-items:center;justify-content:center;">+</button>
+        </div>
+        </div>
           <!-- Agrandar combo -->
           <div class="form-check form-switch mb-3 d-flex align-items-center">
             <input class="form-check-input" type="checkbox" id="toggleAgrandarCombo">
@@ -596,48 +598,55 @@
  class CategoryCarousel {
     constructor() {
         this.track = document.getElementById('carouselTrack');
-        this.cards = document.querySelectorAll('.category-carousel-card');
+        this.cards = Array.from(document.querySelectorAll('.category-carousel-card'));
         this.prevBtn = document.querySelector('.category-carousel-prev');
         this.nextBtn = document.querySelector('.category-carousel-next');
-        
-        this.cardWidth = 220; // Ancho de cada tarjeta + gap
+        this.cardWidth = this.cards[0].offsetWidth + parseInt(getComputedStyle(this.track).gap || 20);
         this.currentPosition = 0;
         this.visibleCards = this.calculateVisibleCards();
-        this.maxPosition = (this.cards.length - this.visibleCards) * this.cardWidth;
-        
-        // Configurar eventos
+        this.maxPosition = this.calculateMaxPosition();
+
+        // Eventos
         this.prevBtn.addEventListener('click', () => this.move(-1));
         this.nextBtn.addEventListener('click', () => this.move(1));
         window.addEventListener('resize', () => this.handleResize());
     }
-    
+
     calculateVisibleCards() {
         const containerWidth = this.track.parentElement.offsetWidth - 40;
         return Math.floor(containerWidth / this.cardWidth);
     }
-    
+
+    calculateMaxPosition() {
+        // Permite mostrar la última tarjeta completa
+        const containerWidth = this.track.parentElement.offsetWidth - 40;
+        const totalWidth = this.cards.length * this.cardWidth;
+        return Math.max(0, totalWidth - containerWidth);
+    }
+
     move(direction) {
-        this.currentPosition += direction * this.cardWidth * 2; // Mover 2 tarjetas a la vez
-        
-        // Ajustar límites
+        this.maxPosition = this.calculateMaxPosition();
+        this.currentPosition += direction * this.cardWidth * 2;
+
+        // Ajustar límites para mostrar la última tarjeta completa
         if (this.currentPosition < 0) {
             this.currentPosition = 0;
         } else if (this.currentPosition > this.maxPosition) {
             this.currentPosition = this.maxPosition;
         }
-        
+
         this.track.style.transform = `translateX(-${this.currentPosition}px)`;
         this.track.style.transition = 'transform 0.5s ease';
     }
-    
+
     handleResize() {
+        this.cardWidth = this.cards[0].offsetWidth + parseInt(getComputedStyle(this.track).gap || 20);
         this.visibleCards = this.calculateVisibleCards();
-        this.maxPosition = (this.cards.length - this.visibleCards) * this.cardWidth;
-        
+        this.maxPosition = this.calculateMaxPosition();
         if (this.currentPosition > this.maxPosition) {
             this.currentPosition = this.maxPosition;
-            this.track.style.transform = `translateX(-${this.currentPosition}px)`;
         }
+        this.track.style.transform = `translateX(-${this.currentPosition}px)`;
     }
 }
         
@@ -671,11 +680,13 @@
             if (cantidadPedido > 1) {
                 cantidadPedido--;
                 document.getElementById('cantidadPedido').innerText = cantidadPedido;
+                actualizarPrecioModal();
             }
         };
         document.getElementById('btnSumarCantidad').onclick = function() {
             cantidadPedido++;
             document.getElementById('cantidadPedido').innerText = cantidadPedido;
+            actualizarPrecioModal();
         };
 
         // Agrandar combo lógica
@@ -685,11 +696,39 @@
             actualizarPrecioModal();
         });
 
+        // Sumar extras y agregables al precio
+        document.addEventListener('change', function(e) {
+            if (
+                e.target.classList.contains('extra-checkbox') ||
+                e.target.classList.contains('producto-checkbox')
+            ) {
+                actualizarPrecioModal();
+            }
+        });
+
         function actualizarPrecioModal() {
             if (!productoSeleccionado) return;
             let precioBase = parseFloat(productoSeleccionado.precio.toString().replace('$',''));
-            let precioFinal = agrandarCombo ? (precioBase + 2.5) : precioBase;
-            document.getElementById('modalProductoPrecio').innerText = '$' + precioFinal.toFixed(2);
+            let extrasTotal = 0;
+            let agregablesTotal = 0;
+
+    // Sumar extras seleccionados
+    document.querySelectorAll('#extrasContainer .extra-checkbox:checked').forEach(cb => {
+        extrasTotal += parseFloat(cb.getAttribute('data-precio'));
+    });
+
+    // Sumar productos agregables seleccionados
+    document.querySelectorAll('#productosAdicionalesContainer .producto-checkbox:checked').forEach(cb => {
+        agregablesTotal += parseFloat(cb.getAttribute('data-precio'));
+    });
+
+    // Sumar agrandar combo
+    let agrandar = agrandarCombo ? 2.5 : 0;
+
+    // Total = (precio base * cantidad) + extras + agregables + agrandar
+    let precioFinal = (precioBase * cantidadPedido) + extrasTotal + agregablesTotal + agrandar;
+
+    document.getElementById('modalProductoPrecio').innerText = '$' + precioFinal.toFixed(2);
         }
 
         // Función para agregar al carrito (muestra modal con info)
@@ -882,13 +921,6 @@ function mostrarToastCarrito() {
                             <button class="btn btn-primary w-100 mt-2" onclick="agregarAlCarrito(${producto.idProducto})">Añadir al carrito</button>
                         </div>
                     </div>
-                `;
-                productosContainer.appendChild(productoDiv);
-            });
-            
-            // Restaurar vista original
-            document.getElementById('productosTitulo').style.display = 'block';
-            document.getElementById('currentCategoryTitle').style.display = 'none';
         }
     </script>
 </body>
