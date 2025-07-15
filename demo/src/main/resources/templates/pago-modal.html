@@ -1,0 +1,900 @@
+<div th:fragment="modal(usuario)">
+  <div class="modal fade" id="pagoModal" tabindex="-1" aria-labelledby="pagoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header border-0 pb-0 bg-gradient-custom">
+          <h5 class="modal-title text-white fw-bold">
+            <i class="fas fa-shopping-cart me-2"></i>Finalizar compra
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body pb-4">
+          <!-- Pasos Mejorados -->
+          <div class="steps-container mb-4">
+            <div class="d-flex justify-content-center align-items-center position-relative">
+              <div class="progress-line-bg"></div>
+              <div class="progress-line-active" id="progressLine"></div>
+              
+              <div class="text-center flex-fill step-item">
+                <div class="step-circle active" id="step1circle">
+                  <i class="fas fa-user"></i>
+                </div>
+                <small class="step-label active" id="step1label">Datos</small>
+              </div>
+              
+              <div class="text-center flex-fill step-item">
+                <div class="step-circle" id="step2circle">
+                  <i class="fas fa-credit-card"></i>
+                </div>
+                <small class="step-label" id="step2label">Pago</small>
+              </div>
+              
+              <div class="text-center flex-fill step-item">
+                <div class="step-circle" id="step3circle">
+                  <i class="fas fa-file-invoice"></i>
+                </div>
+                <small class="step-label" id="step3label">Factura</small>
+              </div>
+              
+              <div class="text-center flex-fill step-item">
+                <div class="step-circle" id="step4circle">
+                  <i class="fas fa-check"></i>
+                </div>
+                <small class="step-label" id="step4label">Confirmación</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Paso 1: Datos Mejorados -->
+          <div id="pasoDireccion">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="info-card mb-3">
+                  <div class="info-card-header">
+                    <h6 class="mb-0"><i class="fas fa-user-circle me-2"></i>Información Personal</h6>
+                  </div>
+                  <div class="info-card-body">
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Nombre Completo</label>
+                      <div class="form-control-plaintext bg-light rounded p-2" id="nombreCliente" th:text="${usuario != null ? usuario.nombre : ''}">Nombre Usuario</div>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Correo Electrónico</label>
+                      <div class="form-control-plaintext bg-light rounded p-2" id="correoCliente" th:text="${usuario != null ? usuario.correo : ''}">correo@ejemplo.com</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="info-card mb-3">
+                  <div class="info-card-header">
+                    <h6 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Ubicación de Entrega</h6>
+                  </div>
+                  <div class="info-card-body">
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Seleccionar Ubicación</label>
+                      <select class="form-select custom-select" id="ubicacionSelect" onchange="manejarUbicacion()">
+                        <option value="">Seleccionar ubicación guardada...</option>
+                        <option value="casa">🏠 Casa - Calle Principal #123, Bella Vista</option>
+                        <option value="oficina">🏢 Oficina - Torre Global Plaza, Piso 15</option>
+                        <option value="trabajo">🏭 Trabajo - Zona Industrial, Edificio A</option>
+                        <option value="nueva">➕ Agregar nueva ubicación</option>
+                      </select>
+                    </div>
+                    
+                    <div id="nuevaUbicacion" style="display: none;" class="nueva-ubicacion-form">
+                      <div class="mb-2">
+                        <input type="text" class="form-control" placeholder="Dirección completa" id="direccion">
+                      </div>
+                      <div class="mb-2">
+                        <input type="text" class="form-control" placeholder="Ciudad" id="ciudad">
+                      </div>
+                      <div class="mb-2">
+                        <input type="text" class="form-control" placeholder="Referencia (edificio, color de casa, etc.)" id="referencia">
+                      </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Especificaciones Adicionales</label>
+                      <textarea class="form-control custom-textarea" rows="3" placeholder="Instrucciones especiales para la entrega, horario preferido, contacto adicional..." id="especificaciones"></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="text-end">
+              <button class="btn btn-primary btn-lg px-4 custom-btn-primary" onclick="mostrarPasoPago()">
+                Siguiente <i class="fas fa-arrow-right ms-2"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Paso 2: Pago Mejorado -->
+          <div id="pasoPago" style="display:none;">
+            <div class="row">
+              <div class="col-md-8">
+                <h6 class="mb-3 section-title"><i class="fas fa-credit-card me-2"></i>Método de pago</h6>
+                <div class="payment-grid mb-4">
+                  <div class="payment-option">
+                    <input type="radio" class="btn-check" name="metodoPago" id="pagoYappy" value="yappy" autocomplete="off" checked>
+                    <label class="payment-label" for="pagoYappy">
+                      <div class="payment-icon">
+                        <img src="https://imgs.search.brave.com/sl72MSXqfzCvD8lwaClkGUxuO0yBpeHyfUnJjvuNF6E/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jYXNj/b3lvZ2FwYW5hbWEu/Y29tL3dwLWNvbnRl/bnQvdXBsb2Fkcy8y/MDIwLzA1L3lhcHB5/LUJJRy1Mb2dvLTMw/MHgyNTkucG5n" alt="Yappy" width="40">
+                      </div>
+                      <span class="payment-name">Yappy</span>
+                    </label>
+                  </div>
+                  
+                  <div class="payment-option">
+                    <input type="radio" class="btn-check" name="metodoPago" id="pagoEfectivo" value="efectivo" autocomplete="off">
+                    <label class="payment-label" for="pagoEfectivo">
+                      <div class="payment-icon">
+                        <img src="https://imgs.search.brave.com/Ck9lVmutPwqQiJ07ycrJWBuOU-Fsn3HvU41atWf1Rcc/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWMudmVjdGVlenku/Y29tL3N5c3RlbS9y/ZXNvdXJjZXMvdGh1/bWJuYWlscy8wMDUv/NDU4LzA2Ny9zbWFs/bC9tb25leS1jYXNo/LXdlYWx0aC1wYXlt/ZW50LXNvbGlkLWlj/b24taWxsdXN0cmF0/aW9uLWxvZ28tdGVt/cGxhdGUtc3VpdGFi/bGUtZm9yLW1hbnkt/cHVycG9zZXMtZnJl/ZS12ZWN0b3IuanBn" alt="Efectivo" width="40">
+                      </div>
+                      <span class="payment-name">Efectivo</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Información específica de Yappy -->
+                <div id="infoYappy" class="payment-info">
+                  <div class="alert alert-info custom-alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Pago con Yappy:</strong> Escanea el código QR o transfiere al número <b>6640-7034</b>.<br>
+                    <img src="https://ik.imagekit.io/so4443s8q/qr-yappy(1).png?updatedAt=1752264403046" alt="QR Yappy" class="mt-2 mb-2"><br>
+                    <span class="text-muted">Realiza el pago solo cuando recibas el producto.</span>
+                  </div>
+                </div>
+
+                <!-- Información específica de Efectivo -->
+                <div id="infoEfectivo" class="payment-info" style="display:none;">
+                  <div class="alert alert-warning custom-alert">
+                    <i class="fas fa-money-bill-wave me-2"></i>
+                    <strong>Pago en efectivo:</strong> Entrega el monto exacto al repartidor al recibir tu pedido.<br>
+                    <span class="text-muted">Recuerda verificar tu cambio antes de finalizar la entrega.</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-4">
+                <!-- Resumen mejorado -->
+                <div class="summary-card">
+                  <div class="summary-header">
+                    <h6 class="mb-0"><i class="fas fa-receipt me-2"></i>Resumen del pedido</h6>
+                  </div>
+                  <div class="summary-body">
+                    <div class="summary-item">
+                      <span>Subtotal (2 items)</span>
+                      <span>$60.80</span>
+                    </div>
+                    <div class="summary-item">
+                      <span>Costo de envío</span>
+                      <span>$5.50</span>
+                    </div>
+                    <div class="summary-item discount">
+                      <span>Descuento</span>
+                      <span>-$2.00</span>
+                    </div>
+                    <hr class="summary-divider">
+                    <div class="summary-total">
+                      <span>Total</span>
+                      <span>$64.30</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+              <button class="btn btn-outline-secondary btn-lg px-4" onclick="mostrarPasoDireccion()">
+                <i class="fas fa-arrow-left me-2"></i>Atrás
+              </button>
+              <button id="btnConfirmarPedido" class="btn btn-success btn-lg px-4 flex-fill ms-3">
+                <span class="btn-text">Confirmar pedido</span>
+                <i class="fas fa-lock ms-2"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Paso 3: Factura (NUEVO) -->
+          <div id="pasoFactura" style="display:none;">
+            <div class="invoice-container">
+              <div class="invoice-header">
+                <div class="row">
+                  <div class="col-md-6">
+                    <h4 class="text-primary mb-1">FACTURA #001234</h4>
+                    <p class="mb-1"><strong>Fecha:</strong> <span id="fechaFactura"></span></p>
+                    <p class="mb-1"><strong>Cliente:</strong> <span id="clienteFactura" th:text="${usuario != null ? usuario.nombre : ''}"></span></p>
+                    <p class="mb-0"><strong>Email:</strong> <span id="emailFactura"th:text="${usuario != null ? usuario.correo : ''}"></span></p>
+                  </div>
+                  <div class="col-md-6 text-end">
+                    <div class="company-info">
+                      <h5 class="text-dark">Mi Empresa S.A.</h5>
+                      <p class="mb-1">Calle Comercial #456</p>
+                      <p class="mb-1">Panamá Oeste, Panamá</p>
+                      <p class="mb-0">Tel: +507 6640-7034</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="invoice-body">
+                <div class="table-responsive">
+                  <table class="table invoice-table">
+                    <thead>
+                      <tr>
+                        <th>Producto</th>
+                        <th class="text-center">Cantidad</th>
+                        <th class="text-end">Precio Unit.</th>
+                        <th class="text-end">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody id="productosFactura">
+                      <tr>
+                        <td>
+                          <div class="product-info">
+                            <strong>Producto Premium A</strong>
+                            <small class="text-muted d-block">Descripción del producto premium</small>
+                          </div>
+                        </td>
+                        <td class="text-center">1</td>
+                        <td class="text-end">$35.40</td>
+                        <td class="text-end">$35.40</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <div class="product-info">
+                            <strong>Producto Estándar B</strong>
+                            <small class="text-muted d-block">Descripción del producto estándar</small>
+                          </div>
+                        </td>
+                        <td class="text-center">1</td>
+                        <td class="text-end">$25.40</td>
+                        <td class="text-end">$25.40</td>
+                      </tr>
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <th colspan="3" class="text-end">Subtotal:</th>
+                        <th class="text-end">$60.80</th>
+                      </tr>
+                      <tr>
+                        <th colspan="3" class="text-end">Envío:</th>
+                        <th class="text-end">$5.50</th>
+                      </tr>
+                      <tr>
+                        <th colspan="3" class="text-end">Descuento:</th>
+                        <th class="text-end text-success">-$2.00</th>
+                      </tr>
+                      <tr class="invoice-total">
+                        <th colspan="3" class="text-end">TOTAL:</th>
+                        <th class="text-end">$64.30</th>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+
+                <div class="invoice-details mt-4">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <p><strong>Método de Pago:</strong> <span id="metodoPagoFactura"></span></p>
+                      <p><strong>Dirección de Entrega:</strong> <span id="direccionFactura"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                      <p><strong>Especificaciones:</strong> <span id="especificacionesFactura"></span></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="invoice-actions text-center mt-4">
+                <button class="btn btn-primary btn-lg me-3" onclick="descargarPDF()">
+                  <i class="fas fa-download me-2"></i>Descargar PDF
+                </button>
+                <button class="btn btn-outline-primary btn-lg me-3" onclick="imprimirFactura()">
+                  <i class="fas fa-print me-2"></i>Imprimir
+                </button>
+                <button class="btn btn-success btn-lg" onclick="mostrarPasoConfirmacion()">
+                  Continuar <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Paso 4: Confirmación -->
+          <div id="pasoConfirmacion" style="display:none;">
+            <div class="text-center py-5">
+              <div class="success-animation mb-4">
+                <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+              </div>
+              <h4 class="text-success mb-3">Pedido realizado con éxito!</h4>
+              <p class="lead mb-4">Tu pedido ha sido confirmado y está siendo procesado.</p>
+              
+              <div class="alert alert-info custom-alert mb-4">
+                <h6><i class="fas fa-truck me-2"></i>Información de Entrega</h6>
+                <p class="mb-1">¡Gracias por preferirnos! Tu pedido está en camino y será entregado muy pronto.</p>
+                <p class="mb-1">Recuerda que <strong>el pago debe realizarse únicamente al momento de recibir el pedido</strong>, ya sea por Yappy o en efectivo.</p>
+                <p class="mb-0 text-success">Nuestro repartidor te contactará al llegar. ¡Disfruta tu compra!</p>
+              </div>
+              
+              <div class="d-flex justify-content-center gap-3">
+                <button class="btn btn-outline-primary btn-lg" onclick="mostrarPasoFactura()">
+                  <i class="fas fa-file-invoice me-2"></i>Ver Factura
+                </button>
+                <button class="btn btn-primary btn-lg" data-bs-dismiss="modal">
+                  <i class="fas fa-home me-2"></i>Finalizar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Importar Font Awesome */
+    @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
+
+    /* Gradiente personalizado */
+    .bg-gradient-custom {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    /* Contenedor de pasos mejorado */
+    .steps-container {
+      position: relative;
+      padding: 20px 0;
+    }
+
+    .progress-line-bg {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #e9ecef;
+      z-index: 1;
+      border-radius: 2px;
+    }
+
+    .progress-line-active {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #28a745, #20c997);
+      z-index: 2;
+      border-radius: 2px;
+      width: 25%;
+      transition: width 0.5s ease;
+    }
+
+    .step-item {
+      position: relative;
+      z-index: 3;
+    }
+
+    .step-circle {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #e9ecef;
+      color: #6c757d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 8px;
+      font-size: 18px;
+      transition: all 0.3s ease;
+      border: 3px solid #e9ecef;
+    }
+
+    .step-circle.active {
+      background: #28a745;
+      color: white;
+      border-color: #28a745;
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(40, 167, 69, 0.3);
+    }
+
+    .step-label {
+      display: block;
+      font-weight: 500;
+      color: #6c757d;
+      transition: color 0.3s ease;
+    }
+
+    .step-label.active {
+      color: #28a745;
+      font-weight: 600;
+    }
+
+    /* Cards de información */
+    .info-card {
+      border: 1px solid #e9ecef;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .info-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .info-card-header {
+      background: #f8f9fa;
+      padding: 15px 20px;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .info-card-body {
+      padding: 20px;
+    }
+
+    /* Formularios personalizados */
+    .custom-select {
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      padding: 12px 16px;
+      transition: all 0.3s ease;
+    }
+
+    .custom-select:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    .custom-textarea {
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      resize: vertical;
+      transition: all 0.3s ease;
+    }
+
+    .custom-textarea:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    .nueva-ubicacion-form {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      border: 2px dashed #dee2e6;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Métodos de pago */
+    .payment-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+    }
+
+    .payment-option {
+      position: relative;
+    }
+
+    .payment-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 15px;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: white;
+      height: 100px;
+    }
+
+    .payment-label:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      border-color: #667eea;
+    }
+
+    .btn-check:checked + .payment-label {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border-color: #667eea;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .payment-icon {
+      margin-bottom: 8px;
+    }
+
+    .payment-name {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Información de pago */
+    .payment-info {
+      margin-top: 20px;
+    }
+
+    .custom-alert {
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+    }
+
+    /* Formulario de tarjeta */
+    .card-form {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #e9ecef;
+    }
+
+    /* Resumen del pedido */
+    .summary-card {
+      border: 1px solid #e9ecef;
+      border-radius: 12px;
+      overflow: hidden;
+      position: sticky;
+      top: 20px;
+    }
+
+    .summary-header {
+      background: #f8f9fa;
+      padding: 15px 20px;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .summary-body {
+      padding: 20px;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .summary-item.discount span:last-child {
+      color: #28a745;
+      font-weight: 600;
+    }
+
+    .summary-divider {
+      margin: 15px 0;
+      border-color: #e9ecef;
+    }
+
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 18px;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    /* Factura */
+    .invoice-container {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .invoice-header {
+      background: #f8f9fa;
+      padding: 30px;
+      border-bottom: 2px solid #e9ecef;
+    }
+
+    .invoice-body {
+      padding: 30px;
+    }
+
+    .invoice-table {
+      margin-bottom: 0;
+    }
+
+    .invoice-table thead th {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 15px;
+      font-weight: 600;
+    }
+
+    .invoice-table tbody td {
+      padding: 15px;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .invoice-table tfoot th {
+      padding: 12px 15px;
+      border-top: 2px solid #e9ecef;
+    }
+
+    .invoice-total th {
+      background: #28a745;
+      color: white;
+      font-size: 16px;
+    }
+
+    .product-info strong {
+      color: #333;
+    }
+
+    .company-info {
+      color: #6c757d;
+      font-size: 14px;
+    }
+
+    .invoice-details {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    .invoice-actions {
+      padding: 20px 30px;
+      background: #f8f9fa;
+      border-top: 1px solid #e9ecef;
+    }
+
+    /* Botones personalizados */
+    .custom-btn-primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .custom-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    /* Animación de éxito */
+    .success-animation {
+      animation: bounceIn 0.8s ease-out;
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0.3); opacity: 0; }
+      50% { transform: scale(1.05); }
+      70% { transform: scale(0.9); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Títulos de sección */
+    .section-title {
+      color: #333;
+      font-weight: 600;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 8px;
+      display: inline-block;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .payment-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .modal-dialog {
+        margin: 10px;
+      }
+      
+      .invoice-header,
+      .invoice-body,
+      .invoice-actions {
+        padding: 20px;
+      }
+    }
+
+    /* Estilos para impresión */
+    @media print {
+      .invoice-actions,
+      .modal-header,
+      .steps-container {
+        display: none !important;
+      }
+      
+      .invoice-container {
+        box-shadow: none;
+      }
+    }
+  </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+
+    const productosComprados = [
+      { nombre: "Producto Premium A", descripcion: "Descripción del producto premium", cantidad: 1, precio: 35.40 },
+      { nombre: "Producto Estándar B", descripcion: "Descripción del producto estándar", cantidad: 1, precio: 25.40 }
+    ];
+
+    // Control de pasos mejorado
+    function actualizarProgreso(paso) {
+      const progressLine = document.getElementById('progressLine');
+      const porcentajes = [25, 50, 75, 100];
+      progressLine.style.width = porcentajes[paso - 1] + '%';
+      
+      // Actualizar círculos
+      for (let i = 1; i <= 4; i++) {
+        const circle = document.getElementById(`step${i}circle`);
+        const label = document.getElementById(`step${i}label`);
+        
+        if (i <= paso) {
+          circle.classList.add('active');
+          label.classList.add('active');
+        } else {
+          circle.classList.remove('active');
+          label.classList.remove('active');
+        }
+      }
+    }
+
+    function mostrarPasoPago() {
+      document.getElementById('pasoDireccion').style.display = 'none';
+      document.getElementById('pasoPago').style.display = 'block';
+      document.getElementById('pasoFactura').style.display = 'none';
+      document.getElementById('pasoConfirmacion').style.display = 'none';
+      actualizarProgreso(2);
+    }
+
+    function mostrarPasoDireccion() {
+      document.getElementById('pasoDireccion').style.display = 'block';
+      document.getElementById('pasoPago').style.display = 'none';
+      document.getElementById('pasoFactura').style.display = 'none';
+      document.getElementById('pasoConfirmacion').style.display = 'none';
+      actualizarProgreso(1);
+    }
+
+    function mostrarPasoFactura() {
+      document.getElementById('pasoDireccion').style.display = 'none';
+      document.getElementById('pasoPago').style.display = 'none';
+      document.getElementById('pasoFactura').style.display = 'block';
+      document.getElementById('pasoConfirmacion').style.display = 'none';
+      generarFactura();
+      actualizarProgreso(3);
+    }
+
+    function mostrarPasoConfirmacion() {
+      document.getElementById('pasoDireccion').style.display = 'none';
+      document.getElementById('pasoPago').style.display = 'none';
+      document.getElementById('pasoFactura').style.display = 'none';
+      document.getElementById('pasoConfirmacion').style.display = 'block';
+      actualizarProgreso(4);
+    }
+
+    // Manejo de ubicaciones
+    function manejarUbicacion() {
+      const select = document.getElementById('ubicacionSelect');
+      const nuevaUbicacion = document.getElementById('nuevaUbicacion');
+      
+      if (select.value === 'nueva') {
+        nuevaUbicacion.style.display = 'block';
+      } else {
+        nuevaUbicacion.style.display = 'none';
+      }
+    }
+
+    // Procesar pago con animación
+    function procesarPago() {
+      const btn = event.target;
+      const btnText = btn.querySelector('.btn-text');
+      const originalText = btnText.textContent;
+      
+      btnText.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
+      btn.disabled = true;
+      
+      setTimeout(() => {
+        mostrarPasoFactura();
+        btnText.textContent = originalText;
+        btn.disabled = false;
+      }, 2000);
+    }
+
+    // Generar factura
+    function generarFactura() {
+      const fecha = new Date().toLocaleDateString('es-ES');
+      const metodoRadio = document.querySelector('input[name="metodoPago"]:checked');
+      const metodoPago = metodoRadio ? metodoRadio.nextElementSibling.querySelector('.payment-name').textContent : '';
+      const ubicacionSelect = document.getElementById('ubicacionSelect');
+      let direccion = ubicacionSelect.options[ubicacionSelect.selectedIndex].text;
+
+      // Si el usuario seleccionó "nueva", toma los campos de nueva ubicación
+      if (ubicacionSelect.value === 'nueva') {
+        const direccionNueva = document.getElementById('direccion').value;
+        const ciudadNueva = document.getElementById('ciudad').value;
+        const referenciaNueva = document.getElementById('referencia').value;
+        direccion = `${direccionNueva}, ${ciudadNueva} (${referenciaNueva})`;
+      }
+
+      const especificaciones = document.getElementById('especificaciones').value || 'Ninguna especificación adicional';
+
+      document.getElementById('fechaFactura').textContent = fecha;
+      document.getElementById('metodoPagoFactura').textContent = metodoPago;
+      document.getElementById('direccionFactura').textContent = direccion;
+      document.getElementById('especificacionesFactura').textContent = especificaciones;
+    }
+
+    // Descargar PDF
+    function descargarPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      // Configuración
+      doc.setFont("helvetica");
+      
+      // Encabezado
+      doc.setFontSize(20);
+      doc.setTextColor(102, 126, 234);
+      doc.text('FACTURA #001234', 20, 30);
+      
+      // Información
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`Cliente: ${datosCliente.nombre}`, 20, 50);
+      doc.text(`Email: ${datosCliente.correo}`, 20, 60);
+      doc.text(`Fecha: ${new Date().toLocaleDateString('es-ES')}`, 20, 70);
+      
+      // Productos
+      doc.setFontSize(14);
+      doc.text('PRODUCTOS COMPRADOS:', 20, 90);
+      
+      let y = 105;
+      productosComprados.forEach(producto => {
+        doc.setFontSize(11);
+        doc.text(`• ${producto.nombre}`, 25, y);
+        doc.text(`Cantidad: ${producto.cantidad}`, 25, y + 8);
+        doc.text(`Precio: $${producto.precio}`, 25, y + 16);
+        y += 30;
+      });
+      
+      // Totales
+      doc.setFontSize(12);
+      doc.text('Subtotal: $60.80', 20, y + 10);
+      doc.text('Envío: $5.50', 20, y + 20);
+      doc.text('Descuento: -$2.00', 20, y + 30);
+      
+      doc.setFontSize(16);
+      doc.setTextColor(40, 167, 69);
+      doc.text('TOTAL: $64.30', 20, y + 45);
+      
+      doc.save('factura-001234.pdf');
+    }
+
+    // Imprimir factura
+    function imprimirFactura() {
+      window.print();
+    }
+
+    // Actualizar campos de pago
+    function actualizarCamposPago() {
+      const metodo = document.querySelector('input[name="metodoPago"]:checked').value;
+      document.getElementById('infoYappy').style.display = metodo === 'yappy' ? 'block' : 'none';
+      document.getElementById('infoEfectivo').style.display = metodo === 'efectivo' ? 'block' : 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('input[name="metodoPago"]').forEach(function(radio) {
+        radio.addEventListener('change', actualizarCamposPago);
+      });
+      actualizarCamposPago();
+      actualizarProgreso(1);
+      document.getElementById('btnConfirmarPedido').addEventListener('click', procesarPago);
+    });
+  </script>
+</div>
