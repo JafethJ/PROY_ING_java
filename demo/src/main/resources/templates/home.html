@@ -618,7 +618,6 @@
     }
 
     calculateMaxPosition() {
-        // Permite mostrar la última tarjeta completa
         const containerWidth = this.track.parentElement.offsetWidth - 40;
         const totalWidth = this.cards.length * this.cardWidth;
         return Math.max(0, totalWidth - containerWidth);
