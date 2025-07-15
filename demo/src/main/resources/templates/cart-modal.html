@@ -1,0 +1,179 @@
+<div th:fragment="cart-modal">
+  <div class="modal fade cart-modal-main" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+      <div class="modal-content border-0 rounded-4 shadow">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold text-orange" id="cartModalLabel">MI CARRITO</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body pt-0">
+          <div class="row g-4">
+            <!-- Productos -->
+            <div class="col-lg-7">
+              <div id="cartItems" class="d-flex flex-column gap-3" style="max-height: 400px; overflow-y: auto;">
+                <!-- Producto ejemplo -->
+                <div class="cart-item d-flex align-items-start cart-modal-bg rounded-3 p-3 cart-modal-shadow flex-wrap">
+                  <img src="https://i.postimg.cc/Zn0V9Gyw/spicy-burger-7323694-1280.jpg" alt="Producto" class="rounded-3 me-3" style="width:64px;height:64px;object-fit:cover;">
+                  <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between">
+                      <div>
+                        <span class="fw-semibold fs-6">Hamburguesa Clásica</span>
+                        <div class="d-flex flex-wrap gap-2 mt-1">
+                          <span class="badge cart-modal-badge border text-dark">Queso
+                            <button class="btn btn-sm btn-link text-danger p-0 ms-1">&times;</button>
+                          </span>
+                          <span class="badge cart-modal-badge border text-dark">Bacon
+                            <button class="btn btn-sm btn-link text-danger p-0 ms-1">&times;</button>
+                          </span>
+                        </div>
+                      </div>
+                      <div class="text-end">
+                        <button class="btn btn-link text-orange fs-5 p-0"><i class="bi bi-x-lg"></i></button>
+                        <div class="fw-bold text-orange mt-1">$5.00</div>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center mt-2">
+                      <button class="btn btn-outline-orange btn-sm">-</button>
+                      <span class="mx-2 fw-bold">2</span>
+                      <button class="btn btn-outline-orange btn-sm">+</button>
+                      <span class="ms-auto fw-semibold">$10.00</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Botones -->
+              <div class="mt-4 d-flex gap-2">
+                <button class="btn btn-orange flex-grow-1">
+                  ← Seguir comprando
+                </button>
+                <button class="btn btn-outline-orange flex-grow-1">Limpiar carrito</button>
+              </div>
+            </div>
+            <!-- Resumen -->
+            <div class="col-lg-5">
+              <div class="cart-modal-bg rounded-3 p-4 cart-modal-shadow h-100">
+                <div class="d-flex mb-3">
+                  <button class="btn btn-outline-orange flex-fill me-2 active">en local</button>
+                  <button class="btn btn-orange flex-fill">Delivery</button>
+                </div>
+                <h6 class="fw-bold mb-3">Order Summary</h6>
+                <div class="d-flex justify-content-between py-1">
+                  <span>Items</span>
+                  <span>9</span>
+                </div>
+                <div class="d-flex justify-content-between py-1">
+                  <span>Sub Total</span>
+                  <span>$85.40</span>
+                </div>
+                <div class="d-flex justify-content-between py-1">
+                  <span>Shipping</span>
+                  <span>$0.00</span>
+                </div>
+                <div class="d-flex justify-content-between py-1">
+                  <span>Taxes</span>
+                  <span>$0.00</span>
+                </div>
+                <div class="d-flex justify-content-between py-1">
+                  <span>Coupon Discount</span>
+                  <span class="text-success">-$10.00</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between fw-bold fs-5">
+                  <span>Total</span>
+                  <span class="text-orange">$74.40</span>
+                </div>
+                <button class="btn btn-orange w-100 mt-4 py-2 fs-5 rounded-3">Proceed to Checkout</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .cart-modal-main {
+      /* Asegura que los estilos solo apliquen dentro del modal */
+    }
+    .cart-modal-main .cart-modal-bg {
+      background: #fff8f2 !important;
+    }
+    .cart-modal-main .cart-modal-shadow {
+      box-shadow: 0 4px 16px rgba(255,136,0,0.08) !important;
+    }
+    .cart-modal-main .btn-orange {
+      background: #ff8800;
+      color: white;
+      border: none;
+      transition: background 0.2s;
+    }
+    .cart-modal-main .btn-orange:hover, 
+    .cart-modal-main .btn-orange.active {
+      background: #e65100;
+      color: #fff;
+    }
+    .cart-modal-main .btn-outline-orange {
+      border: 2px solid #ff8800;
+      color: #ff8800;
+      background: #fff;
+      transition: background 0.2s, color 0.2s;
+    }
+    .cart-modal-main .btn-outline-orange:hover, 
+    .cart-modal-main .btn-outline-orange.active {
+      background: #ff8800;
+      color: #fff;
+    }
+    .cart-modal-main .text-orange {
+      color: #ff8800 !important;
+    }
+    .cart-modal-main .cart-item .btn-outline-orange {
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      font-size: 1rem;
+      padding: 0;
+    }
+    .cart-modal-main .cart-item .btn-link.text-orange {
+      color: #ff8800;
+    }
+    .cart-modal-main .cart-item img {
+      border-radius: 12px;
+      border: 2px solid #ffe0b2;
+      background: #fff;
+    }
+    .cart-modal-main .cart-item {
+      background: #fff8f2 !important;
+    }
+    .cart-modal-main .cart-modal-badge {
+      background: #ffe0b2 !important;
+      color: #b85c00 !important;
+    }
+    .cart-modal-main .badge button {
+      font-size: 0.75rem;
+      line-height: 1;
+      padding: 0 4px;
+    }
+    .cart-modal-main .modal-content {
+      border-radius: 1.5rem;
+    }
+    @media (max-width: 900px) {
+      .cart-modal-main .modal-dialog {
+        max-width: 95vw;
+      }
+      .cart-modal-main .cart-item img {
+        width: 56px !important;
+        height: 56px !important;
+      }
+    }
+    @media (max-width: 600px) {
+      .cart-modal-main .modal-body .row {
+        flex-direction: column;
+      }
+      .cart-modal-main .col-lg-7, 
+      .cart-modal-main .col-lg-5 {
+        max-width: 100%;
+        flex: 0 0 100%;
+      }
+    }
+  </style>
+</div>

@@ -44,4 +44,5 @@ public class HomeController {
     public String panelCliente() {
         return "cliente";
     }
+
 }

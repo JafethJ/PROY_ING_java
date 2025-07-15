@@ -311,11 +311,11 @@
             <!-- Si está logueado -->
             <div th:if="${usuario != null}" class="d-flex align-items-center gap-2">
                 <!-- Carrito -->
-                <a href="/carrito" class="btn btn-primary position-relative d-flex align-items-center gap-1" title="Ver Carrito">
+                <button class="btn btn-primary position-relative d-flex align-items-center gap-1" title="Ver Carrito" data-bs-toggle="modal" data-bs-target="#cartModal">
                     <i class="bi bi-cart-fill fs-5"></i>
                     <span class="d-none d-md-inline">Carrito</span>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.7rem;" th:text="${carritoCantidad}" th:if="${carritoCantidad > 0}">0</span>
-                </a>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.7rem;">2</span>
+                </button>
                 <!-- Perfil Dropdown -->
                 <div class="dropdown">
                     <button class="btn btn-outline-light d-flex align-items-center gap-2" type="button" id="dropdownPerfil" data-bs-toggle="dropdown" aria-expanded="false">
@@ -450,6 +450,7 @@
         <p>🍔🍟🥤</p>
     </div>
 </footer>
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -672,6 +673,67 @@
 
     </script>
 
+<div th:replace="cart-modal :: cart-modal"></div>
 
+<script>
+let carrito = [
+    { nombre: "Hamburguesa Clásica", cantidad: 2, precio: 5.00 },
+    { nombre: "Papas Fritas", cantidad: 1, precio: 2.50 }
+];
+
+function renderCarrito() {
+    const cartItems = document.getElementById('cartItems');
+    cartItems.innerHTML = '';
+    carrito.forEach((item, idx) => {
+        cartItems.innerHTML += `
+        <div class="cart-item d-flex align-items-start cart-modal-bg rounded-3 p-3 cart-modal-shadow flex-wrap">
+            <img src="https://i.postimg.cc/Zn0V9Gyw/spicy-burger-7323694-1280.jpg" alt="Producto" class="rounded-3 me-3" style="width:64px;height:64px;object-fit:cover;">
+            <div class="flex-grow-1">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <span class="fw-semibold fs-6">${item.nombre}</span>
+                        <div class="d-flex flex-wrap gap-2 mt-1">
+                            <span class="badge cart-modal-badge border text-dark">Queso
+                                <button class="btn btn-sm btn-link text-danger p-0 ms-1">&times;</button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <button class="btn btn-link text-orange fs-5 p-0" onclick="eliminarDelCarrito(${idx})"><i class="bi bi-x-lg"></i></button>
+                        <div class="fw-bold text-orange mt-1">$${item.precio.toFixed(2)}</div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center mt-2">
+                    <button class="btn btn-outline-orange btn-sm" onclick="cambiarCantidad(${idx}, -1)">-</button>
+                    <span class="mx-2 fw-bold">${item.cantidad}</span>
+                    <button class="btn btn-outline-orange btn-sm" onclick="cambiarCantidad(${idx}, 1)">+</button>
+                    <span class="ms-auto fw-semibold">$${(item.precio * item.cantidad).toFixed(2)}</span>
+                </div>
+            </div>
+        </div>
+        `;
+    });
+}
+
+// Opcional: función para cambiar cantidad
+function cambiarCantidad(idx, delta) {
+    carrito[idx].cantidad += delta;
+    if (carrito[idx].cantidad < 1) carrito[idx].cantidad = 1;
+    renderCarrito();
+}
+
+function eliminarDelCarrito(idx) {
+    carrito.splice(idx, 1);
+    renderCarrito();
+}
+
+// Llama a renderCarrito cada vez que se abra el modal
+document.addEventListener('DOMContentLoaded', () => {
+    const cartModal = document.getElementById('cartModal');
+    if (cartModal) {
+        cartModal.addEventListener('show.bs.modal', renderCarrito);
+    }
+});
+</script>
 </body>
 </html>
