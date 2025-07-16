@@ -301,6 +301,13 @@
             margin-bottom: 20px;
             display: none;
         }
+
+         .btn-circle {
+        border-radius: 50% !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -478,39 +485,49 @@
         <h5 class="modal-title" id="modalAgregarCarritoLabel">Añadir al carrito</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
-      <div class="modal-body text-center">
-        <img id="modalProductoImagen" src="" alt="Imagen producto" class="img-fluid mb-3" style="max-height:180px;">
-        <h5 id="modalProductoNombre"></h5>
-        <p id="modalProductoDescripcion"></p>
-        <!-- Cantidad -->
-        <div class="d-flex justify-content-center align-items-center mb-2">
-            <button type="button" class="btn btn-outline-secondary btn-sm me-2" id="btnRestarCantidad">-</button>
-            <span id="cantidadPedido" style="min-width:30px;display:inline-block;">1</span>
-            <button type="button" class="btn btn-outline-secondary btn-sm ms-2" id="btnSumarCantidad">+</button>
-            <span class="price-tag ms-3" id="modalProductoPrecio"></span>
-        </div>
-        <!-- Agrandar combo -->
-        <div class="form-check form-switch mb-2 d-flex align-items-center justify-content-center">
+      <div class="modal-body px-0">
+        <!-- Imagen ocupa todo el ancho -->
+        <img id="modalProductoImagen" src="" alt="Imagen producto" class="img-fluid w-100 mb-3" style="max-height:220px;object-fit:cover;border-radius:0;">
+        <div class="px-4">
+          <!-- Nombre y precio -->
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <h5 id="modalProductoNombre" class="mb-0"></h5>
+            <span class="price-tag fs-5 mb-0" id="modalProductoPrecio"></span>
+          </div>
+          <!-- Descripción -->
+          <p id="modalProductoDescripcion" class="mb-3 text-muted" style="font-size:1rem;"></p>
+          <!-- Cantidad -->
+            <div class="d-flex align-items-center mb-3">
+            <span class="me-3">Cantidad:</span>
+            <div class="d-flex align-items-center">
+                <button type="button" class="btn btn-outline-secondary btn-circle" id="btnRestarCantidad" style="width:36px;height:36px;font-size:1.3rem;padding:0;display:flex;align-items:center;justify-content:center;">−</button>
+                <span id="cantidadPedido" class="mx-2" style="min-width:24px;text-align:center;font-size:1.2rem;font-weight:500;">1</span>
+                <button type="button" class="btn btn-outline-secondary btn-circle" id="btnSumarCantidad" style="width:36px;height:36px;font-size:1.3rem;padding:0;display:flex;align-items:center;justify-content:center;">+</button>
+              </div>
+            </div>
+          <!-- Agrandar combo -->
+          <div class="form-check form-switch mb-3 d-flex align-items-center">
             <input class="form-check-input" type="checkbox" id="toggleAgrandarCombo">
             <label class="form-check-label ms-2" for="toggleAgrandarCombo">Agrandar (+$2.50)</label>
-        </div>
-        <!-- Extras desplegable (nueva sección) -->
-        <div class="mb-2">
-            <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#extrasCollapse" aria-expanded="false" aria-controls="extrasCollapse">
-                Extras <i class="bi bi-chevron-down"></i>
+          </div>
+          <!-- Extras desplegable -->
+          <div class="mb-2">
+            <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#extrasCollapse" aria-expanded="false" aria-controls="extrasCollapse">
+              Extras <i class="bi bi-chevron-down"></i>
             </button>
             <div class="collapse" id="extrasCollapse">
-                <div id="extrasContainer" class="mt-2"></div>
+              <div id="extrasContainer" class="mt-2"></div>
             </div>
-        </div>
-        <!-- Adicionales desplegable -->
-        <div class="mb-2">
-            <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#productosCollapse" aria-expanded="false" aria-controls="productosCollapse">
-                Añadir a tu pedido <i class="bi bi-chevron-down"></i>
+          </div>
+          <!-- Adicionales desplegable -->
+          <div class="mb-2">
+            <button class="btn btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#productosCollapse" aria-expanded="false" aria-controls="productosCollapse">
+              Añadir a tu pedido <i class="bi bi-chevron-down"></i>
             </button>
             <div class="collapse" id="productosCollapse">
-                <div id="productosAdicionalesContainer" class="mt-2"></div>
+              <div id="productosAdicionalesContainer" class="mt-2"></div>
             </div>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -663,11 +680,15 @@
             if (cantidadPedido > 1) {
                 cantidadPedido--;
                 document.getElementById('cantidadPedido').innerText = cantidadPedido;
+                actualizarPrecioModal();
             }
         };
         document.getElementById('btnSumarCantidad').onclick = function() {
-            cantidadPedido++;
-            document.getElementById('cantidadPedido').innerText = cantidadPedido;
+            if (cantidadPedido < 10) { // No permitir más de 10
+                cantidadPedido++;
+                document.getElementById('cantidadPedido').innerText = cantidadPedido;
+                actualizarPrecioModal();
+            }
         };
 
         // Agrandar combo lógica
@@ -678,11 +699,33 @@
         });
 
         function actualizarPrecioModal() {
-            if (!productoSeleccionado) return;
-            let precioBase = parseFloat(productoSeleccionado.precio.toString().replace('$',''));
-            let precioFinal = agrandarCombo ? (precioBase + 2.5) : precioBase;
-            document.getElementById('modalProductoPrecio').innerText = '$' + precioFinal.toFixed(2);
-        }
+    if (!productoSeleccionado) return;
+
+    // 1. Obtener precio base del producto
+    let precioBase = parseFloat(productoSeleccionado.precio.toString().replace('$',''));
+
+    // 2. Sumar extras seleccionados (multiplicados por cantidad)
+    let extrasTotal = 0;
+    document.querySelectorAll('#extrasContainer .extra-checkbox:checked').forEach(cb => {
+        extrasTotal += parseFloat(cb.getAttribute('data-precio')) * cantidadPedido;
+    });
+
+    // 3. Sumar productos agregables seleccionados (multiplicados por cantidad)
+    let agregablesTotal = 0;
+    document.querySelectorAll('#productosAdicionalesContainer .producto-checkbox:checked').forEach(cb => {
+        agregablesTotal += parseFloat(cb.getAttribute('data-precio')) * cantidadPedido;
+    });
+
+    // 4. Sumar costo por agrandar combo (por cada producto)
+    let agrandar = agrandarCombo ? 2.5 : 0;
+
+    // 5. Calcular precio final:
+    // (precio base + agrandar) * cantidad + (extras * cantidad) + (agregables * cantidad)
+    let precioFinal = ((precioBase + agrandar) * cantidadPedido) + extrasTotal + agregablesTotal;
+
+    // 6. Actualizar el precio en el modal
+    document.getElementById('modalProductoPrecio').innerText = '$' + precioFinal.toFixed(2);
+}
 
         // Función para agregar al carrito (muestra modal con info)
 function agregarAlCarrito(idProducto) {
@@ -782,15 +825,34 @@ document.getElementById('btnConfirmarAgregarCarrito').addEventListener('click', 
             extrasSeleccionados.push(Number(cb.value));
         });
 
+        // Calcular precios individuales
+        let precioBase = parseFloat(productoSeleccionado.precio.toString().replace('$',''));
+        let extrasTotal = 0;
+        document.querySelectorAll('#extrasContainer .extra-checkbox:checked').forEach(cb => {
+            extrasTotal += parseFloat(cb.getAttribute('data-precio')) * cantidadPedido;
+        });
+        let agregablesTotal = 0;
+        document.querySelectorAll('#productosAdicionalesContainer .producto-checkbox:checked').forEach(cb => {
+            agregablesTotal += parseFloat(cb.getAttribute('data-precio')) * cantidadPedido;
+        });
+        let precioAgrandado = agrandarCombo ? 2.5 * cantidadPedido : 0;
+        let precioFinal = (precioBase * cantidadPedido) + precioAgrandado + extrasTotal + agregablesTotal;
+
         const item = {
             idProducto: productoSeleccionado.idProducto,
             nombre: productoSeleccionado.nombre,
-            precioBase: parseFloat(productoSeleccionado.precio),
             cantidad: cantidadPedido,
+            precioBase: precioBase,
+            precioAgrandado: precioAgrandado,
+            precioExtras: extrasTotal,
+            precioAgregables: agregablesTotal,
             agrandado: agrandarCombo,
             productosAdicionales: productosSeleccionados,
-            extras: extrasSeleccionados
+            extras: extrasSeleccionados,
+            precioFinal: parseFloat(precioFinal.toFixed(2))
         };
+
+        console.log("Item enviado al backend:", item);
 
         await fetch('/carrito/agregar', {
             method: 'POST',
@@ -882,6 +944,16 @@ function mostrarToastCarrito() {
             document.getElementById('productosTitulo').style.display = 'block';
             document.getElementById('currentCategoryTitle').style.display = 'none';
         }
+
+        // Escuchar cambios en extras y productos adicionales para actualizar el precio en tiempo real
+document.addEventListener('change', function(e) {
+    if (
+        e.target.classList.contains('extra-checkbox') ||
+        e.target.classList.contains('producto-checkbox')
+    ) {
+        actualizarPrecioModal();
+    }
+});
     </script>
 
     <script src="/js/pago-modal.js"></script>
